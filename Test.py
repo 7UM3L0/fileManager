@@ -1,14 +1,19 @@
 import os
+import shutil
+from datetime import datetime
 
-def directories_list(path,commonn_names):
 
-    doc_list = []
 
-    for item in commonn_names:
+# def copying_diff_content(diff_set,from_path,to_path):
+#
+#     for file in diff_set:
+#
+#
+# This copies the "moving" folder INTO Downloads
+# shutil.copytree("/home/tumelo/moving", "/home/tumelo/Downloads/moving")
+# Result: /home/tumelo/Downloads/moving/
 
-        temp_path = os.path.join(path,item)
 
-        if os.path.isdir(temp_path):
-            doc_list.append(item)
-
-    return doc_list
+# mod_time = os.path.getmtime("Main.py")
+# readable_time = datetime.fromtimestamp(mod_time)
+# print(readable_time)
