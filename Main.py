@@ -66,8 +66,8 @@ def common_dir(common, dev_path, usb_path):
 
 
 ##paths
-dev_path = "/home/tumelo/Downloads"
-usb_path = "/home/tumelo/temp_folder/"
+dev_path = ""##add device path you wish to sync 
+usb_path = ""##add usb path you wish to sync 
 ##path to sets
 dev_set = path_to_set(dev_path)
 usb_set = path_to_set(usb_path)
