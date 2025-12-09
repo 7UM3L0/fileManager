@@ -1,112 +1,90 @@
-##sript should compare content from different directories
-##file intersecting directories and share the difference in content
 import os
 import shutil
 
-##gets the path
-##changes it to a set
-def listing_file(path):
 
-    files = set(os.listdir(path))
-
-    return files
-
-def diff_files(set_one,set_two):
-
-    temp_storage = list(set_one - set_two)
-    file_storage = []
-
-    for file in temp_storage:
-        if not os.path.isdir(file):
-            file_storage.append(file)
-
-    return file_storage
-
-def diff_dir(set_one,set_two):
-
-    temp_storage = list(set_one - set_two)
-    dir_storage = []
-
-    for doc in temp_storage:
-        if os.path.isdir(doc):
-            dir_storage.append(doc)
-
-    return dir_storage
-
-##finds common files/directories
-def common_content(set_one,set_two):
-
-    return list(set_one & set_two)
-
-#check if content is directory
-def is_directory(path,content):
-
-    full_path = os.path.join(path, content)
-
-    return os.path.isdir(full_path)
-
-#collects directories
-def directories_list(path, common_names):
-    doc_list = []
-
-    for item in common_names:
-
-        temp_path = os.path.join(path, item)
-
-        if os.path.isdir(temp_path):
-            doc_list.append(item)
-
-    return doc_list
-
-#collects files
-def file_list(path, commonn_names):
-    doc_list = []
-
-    for item in commonn_names:
-
-        temp_path = os.path.join(path, item)
-
-        if not os.path.isdir(temp_path):
-            doc_list.append(item)
-
-    return doc_list
-
-def create_dir(path,file_name):
-
-    return os.path.join(path,file_name)
+def path_to_set(path):
+    return set(os.listdir((path)))
 
 
-def _files(to_path,file_name):
+##only used for moving files not directories
+def diff_content(diff_sets, from_path, to_path):
+    for content in diff_sets:
+        temp_file = os.path.join(from_path, content)
 
-    shutil.move(file_name,to_path)
-    print(f"Moved {file_name} to ({to_path})")
-
-
-device_path = "/home/tumelo/Downloads"
-usb_path = "/media/tumelo/TUM3L0"
-device_set = listing_file(device_path)#path from device
-usb_set = listing_file(usb_path)##usb path
-common_list = common_content(device_set,usb_set)
-common_files = file_list(device_path,common_list)
-device_dir = diff_dir(device_set,usb_set)
-usb_dir = diff_dir(usb_set,device_set)
-device_file = diff_files(device_set,usb_set)
-usb_file = diff_files(usb_set,device_set)
-
-# from device to usb
-if len(usb_file) > 0:
-    for file in usb_file:
-        temp_file = create_dir(usb_path,file)
-        shutil.move(temp_file,device_path)
-
-else:
-    print("Files from usb to device match")
+        if os.path.isfile(temp_file):
+            shutil.copy2(temp_file, to_path)
+            print(f'Copied {content} to {to_path}')
+        else:
+            temp_to_file = os.path.join(to_path, content)
+            shutil.copytree(temp_file, temp_to_file)
+            print(f'Copied {content} to {to_path}')
 
 
-# from device to usb
-if len(device_file) > 0:
-    for file in device_file:
-        temp_file = create_dir(device_path,file)
-        shutil.move(temp_file,usb_path)
-else:
-    print("Files from device to usb match")
+def common_file(commons, dev_path, usb_path):
+    for content in commons:
+
+        dev_file = os.path.join(dev_path, content)
+        usb_file = os.path.join(usb_path, content)
+
+        if os.path.isfile(dev_file) and os.path.isfile(usb_file):
+            try:
+                temp_dev_content = os.path.join(dev_path, content)
+                temp_usb_content = os.path.join(usb_path, content)
+
+                if os.path.getmtime(temp_dev_content) > os.path.getmtime(temp_usb_content):
+                    print(f"Copying newer version of {content} from dev to USB")
+                    shutil.copy2(temp_dev_content, temp_usb_content)
+                else:
+                    print(f"Copying newer version of {content} from USB to dev")
+                    shutil.copy2(temp_usb_content, temp_dev_content)
+
+            except Exception as e:
+                print(f"Error syncing {content}: {e}")
+
+
+def common_dir(common, dev_path, usb_path):
+    for content in common:
+        dev_dir = os.path.join(dev_path, content)
+        usb_dir = os.path.join(usb_path, content)
+
+        if os.path.isdir(dev_dir) and os.path.isdir(usb_dir):
+            try:
+                dev_dir = os.path.join(dev_path, content)
+                usb_dir = os.path.join(usb_path, content)
+                dev_set = path_to_set(dev_dir)
+                usb_set = path_to_set(usb_dir)
+                commons = list(dev_set & usb_set)
+                not_in_usb = dev_set - usb_set
+                not_in_dev = usb_set - dev_set
+
+                diff_content(not_in_usb, usb_dir, dev_dir)
+                diff_content(not_in_dev, dev_dir, usb_dir)
+                common_file(commons, dev_path, usb_path)
+
+            except Exception as e:
+                print(f"Error syncing {content}: {e}")
+
+
+##paths
+dev_path = "/home/tumelo/Downloads"
+usb_path = "/home/tumelo/temp_folder/"
+##path to sets
+dev_set = path_to_set(dev_path)
+usb_set = path_to_set(usb_path)
+##uncommon content
+not_in_usb = dev_set - usb_set
+not_in_dev = usb_set - dev_set
+##common content
+commons = list(dev_set & usb_set)
+
+## Handle directories first (recursive)
+common_dir(commons, dev_path, usb_path)
+
+## Then handle common files (timestamp comparison)
+common_file(commons, dev_path, usb_path)
+
+## Content from dev to usb
+diff_content(not_in_usb, dev_path, usb_path)
+
+## Content from usb to dev
+diff_content(not_in_dev, usb_path, dev_path)

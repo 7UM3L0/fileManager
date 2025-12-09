@@ -17,3 +17,4 @@ from datetime import datetime
 # mod_time = os.path.getmtime("Main.py")
 # readable_time = datetime.fromtimestamp(mod_time)
 # print(readable_time)
+print(os.path.isdir("/home/tumelo/Downloads/"))
