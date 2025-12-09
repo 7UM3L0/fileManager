@@ -1,4 +1,5 @@
 📁 USB Sync Automation – README
+
 📌 1. What This Project Does
 
 This project automatically syncs files between your computer and a USB drive whenever the USB is inserted.
