@@ -59,22 +59,22 @@ def common_dir(common, dev_path, usb_path):
                 not_in_dev = usb_set - dev_set
 
                 # Copy unique items
-                diff_content(not_in_usb, dev_dir, usb_dir)  # ✓ Fixed direction
+                diff_content(not_in_usb, dev_dir, usb_dir)  
                 diff_content(not_in_dev, usb_dir, dev_dir)
 
                 # Recursively handle subdirectories
                 common_dir(commons, dev_dir, usb_dir)  # ✓ Added recursion
 
                 # Handle common files in this directory
-                common_file(commons, dev_dir, usb_dir)  # ✓ Fixed paths
+                common_file(commons, dev_dir, usb_dir)  
 
             except Exception as e:
                 print(f"Error syncing directory {content}: {e}")
 
 
 ##paths
-dev_path = "/home/tumelo/Downloads/Sgela/"
-usb_path = "/media/tumelo/TUM3L0/Sgela/"
+dev_path = ""## device path of folder you would like to sync with
+usb_path = ""## usb path of folder you would like to sync with
 ##path to sets
 dev_set = path_to_set(dev_path)
 usb_set = path_to_set(usb_path)
